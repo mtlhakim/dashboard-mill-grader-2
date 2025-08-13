@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Mill Grader</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Dashboard Mill Grader</h1>
+  <canvas id="progressChart" width="600" height="300"></canvas>
+
+  <script>
+    const sheetId = "1U2JAfj6INkQ-qxBXFZT5zaYZ_gTAap1NIvYRtzryk4Q";
+    const sheetName = "Form Responses 1";
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+    fetch(url)
+      .then(res => res.text())
+      .then(rep => {
+        const json = JSON.parse(rep.substr(47).slice(0, -2));
+
+        let labels = [];
+        let pabrikasi = [];
+        let instalasiM = [];
+        let instalasiEl = [];
+
+        json.table.rows.forEach(row => {
+          labels.push(row.c[7]?.v); // Kolom PT
+          pabrikasi.push(parseFloat(row.c[4]?.v) || 0);
+          instalasiM.push(parseFloat(row.c[5]?.v) || 0);
+          instalasiEl.push(parseFloat(row.c[6]?.v) || 0);
+        });
+
+        new Chart(document.getElementById("progressChart"), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Progres Pabrikasi (%)', data: pabrikasi, backgroundColor: 'rgba(255, 99, 132, 0.5)' },
+              { label: 'Progres Instalasi Mekanik (%)', data: instalasiM, backgroundColor: 'rgba(54, 162, 235, 0.5)' },
+              { label: 'Progres Instalasi Elektrik (%)', data: instalasiEl, backgroundColor: 'rgba(75, 192, 192, 0.5)' }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 100 } }
+          }
+        });
+      })
+      .catch(err => console.error("Error ambil data:", err));
+  </script>
+</body>
+</html>
